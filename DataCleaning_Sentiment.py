@@ -87,6 +87,12 @@ for i in range(len(nasdaq_data)):
         else:
                 doc[tmp_date] = {'Article' : [(tmp_time,tmp_txt)]}
         i=i+1
+    elif "AAPL" in tmp_title:
+        if tmp_date in doc:
+                doc[tmp_date]['Article'].append( (tmp_time,tmp_txt) ) 
+        else:
+                doc[tmp_date] = {'Article' : [(tmp_time,tmp_txt)]}
+        i=i+1
     else:
         i=i+1
     
