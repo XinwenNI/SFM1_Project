@@ -176,13 +176,17 @@ df_agg.columns = ['Date']
 
 df_agg = pd.concat([df_agg, pd.DataFrame(columns = ['SentScore']),
                  pd.DataFrame(columns = ['Returen']),
+                 pd.DataFrame(columns = ['Frequency']),
+                 pd.DataFrame(columns = ['Dispersion']),
                  pd.DataFrame(columns = ['Volume'])])
 
 
-i=0
-j=0
+#i=0
+#j=0
 df = df.sort_values(['Date','Time']) 
 df_agg = df_agg.sort_values(['Date']) 
+# when the per day article is more than the select value, then calculate the dispersion.
+select_value=10
 for i in range(len(df_agg)):
     temp_score=0
     temp_num=0
@@ -191,6 +195,9 @@ for i in range(len(df_agg)):
             temp_score=temp_score+df.SentScore[j]
             temp_num=temp_num+1
     df_agg.SentScore[i]=temp_score/temp_num
+    df_agg.Frequency[i]=temp_num
+    if temp_num>=select_value:
+        df_agg.Dispersion[i]=np.std(df.SentScore[df.Date==df_agg.Date[i]])
 
 plt.plot(df_agg.Date,df_agg.SentScore, 'o-')
 
