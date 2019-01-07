@@ -252,10 +252,10 @@ NDX_agg = pd.concat([NDX_agg, pd.DataFrame(columns = ['IntradayRV']),pd.DataFram
 for i in range(len(NDX_agg)):
    temp_RV=0
    temp_num=0
-   for j in range(len(NDX)):
-       if NDX_agg.Date[i]==NDX.Date[j]:
-           temp_RV=temp_RV+NDX.log_r[j]
-           temp_num=temp_num+1
+   for j in range(1,len(NDX)):
+       if NDX_agg.Date[i]==NDX.Date[j] and NDX.Date[j]==NDX.Date[j-1]:
+               temp_RV=temp_RV+NDX.log_r[j]
+               temp_num=temp_num+1
    NDX_agg.IntradayRV[i]= np.sqrt(temp_RV/temp_num * 87 * 252) 
    NDX_agg.Frequency[i]=temp_num  
 
@@ -269,8 +269,8 @@ AAPL_agg = pd.concat([NDX_agg, pd.DataFrame(columns = ['IntradayRV']),pd.DataFra
 for i in range(len(AAPL_agg)):
    temp_RV=0
    temp_num=0
-   for j in range(len(AAPL)):
-       if AAPL_agg.Date[i]==AAPL.Date[j]:
+   for j in range(1,len(AAPL)):
+       if AAPL_agg.Date[i]==AAPL.Date[j] and AAPL.Date[j]==AAPL.Date[j-1]:
            temp_RV=temp_RV+AAPL.log_r[j]
            temp_num=temp_num+1
    AAPL_agg.IntradayRV[i]= np.sqrt(temp_RV/temp_num * 87 * 252) 
@@ -328,15 +328,17 @@ final_df=pd.merge(fdf,Comb_agg, on='Date')
 
 
 #plot the sensitivity (averaged per day)
+fig = plt.figure()
 plt.plot(df_agg.Date,df_agg.SentScore, 'o-',linewidth=1,markersize=2)
 
 plt.title('Sentiment')
-plt.xlabel('Time')
+#plt.xlabel('Time')
 plt.ylabel('Sentiment')
-plt.gcf().autofmt_xdate()
+#plt.gcf().autofmt_xdate()
 plt.savefig('Sentiment_Apple.png',dpi = 720,transparent=True)
 
 #plot the dispersion and the quantile 
+fig = plt.figure()
 plt.plot(df_agg.Date,df_agg.Dispersion, 'o-',linewidth=0, markersize=2)
 disp_mean = df_agg.Dispersion.mean()
 disp_q10 = df_agg.Dispersion.quantile(q=0.1)
@@ -349,17 +351,20 @@ plt.title('Dispersion')
 plt.savefig('Sentiment_Dispersion_Apple.png',dpi = 720,transparent=True)
 
 #plot the Apple and NDX IRV 
-plt.plot(NDX_agg.Date,NDX_agg.NDX_IntradayRV, 'o-',linewidth=1, markersize=2)
-plt.plot(AAPL_agg.Date,AAPL_agg.AAPL_IntradayRV, 'o-',linewidth=1, markersize=2)
+fig = plt.figure()
+plt.plot(NDX_agg.Date,NDX_agg.NDX_IntradayRV, 'b',linewidth=1, markersize=2)
+plt.plot(AAPL_agg.Date,AAPL_agg.AAPL_IntradayRV, 'r',linewidth=1, markersize=2)
 
 plt.title('Annualized 5min Intervall Intraday Realised Volatility')
-plt.xlabel('Time')
+#plt.xlabel('Time')
 plt.ylabel('Realised Intraday Volatility (%)')
-plt.gcf().autofmt_xdate()
+#plt.gcf().autofmt_xdate()
+plt.legend(loc='best',frameon=False)
 plt.savefig('RealisedIntradayVol.png',dpi = 720,transparent=True)
-plt.legend(loc='best', )
+
 
 # plot IRV ratio
+fig = plt.figure()
 plt.plot(Comb_agg.Date,Comb_agg.IRV_ratio, 'o-',linewidth=1, markersize=2)
 
 IRVratio_mean = Comb_agg.IRV_ratio.mean()
@@ -371,11 +376,12 @@ plt.axhline(y=IRVratio_q10, xmin=0, xmax=1, linewidth=1, color = 'r')
 plt.axhline(y=IRVratio_q90, xmin=0, xmax=1, linewidth=1, color = 'r')
 
 plt.title('Ratio of Intraday Realised Volatility')
-plt.xlabel('Time')
+#plt.xlabel('Time')
 plt.ylabel('Intraday Realised Volatility Ratio')
-plt.gcf().autofmt_xdate()
+#plt.gcf().autofmt_xdate()
+plt.legend(loc='best',frameon=False )
 plt.savefig('RVRatio.png',dpi = 720,transparent=True)
-plt.legend(loc='best', )
+
 
 
 
@@ -383,16 +389,16 @@ plt.legend(loc='best', )
 fig = plt.figure()
 
 ax1 = fig.add_subplot(111)
-ax1.plot(final_df.Date, final_df.Dispersion)
+ax1.plot(final_df.Date, final_df.Dispersion,'b',linewidth=1, markersize=2)
 ax1.set_ylabel('Dispersion')
 ax1.set_title("Intraday RV Ratio vs Dispersion")
-ax1.legend(loc=0)
+ax1.legend(loc=0,frameon=False)
 ax2 = ax1.twinx()  # this is the important function
-ax2.plot(final_df.Date, final_df.IRV_ratio, 'r')
-ax2.set_ylim([0, 4])
+ax2.plot(final_df.Date, final_df.IRV_ratio, 'r', linewidth=1, markersize=2)
+ax2.set_ylim([0, 3])
 ax2.set_ylabel('IRV Ratio')
 #ax2.set_xlabel('Date')
-ax2.legend(loc='lower right')
+ax2.legend(loc='lower right',frameon=False)
 plt.savefig('Intraday RV Ratio vs Dispersion.png',dpi = 720,transparent=True)
 plt.show()
 
@@ -400,16 +406,16 @@ plt.show()
 fig = plt.figure()
 
 ax1 = fig.add_subplot(111)
-ax1.plot(final_df.Date, final_df.SentScore)
+ax1.plot(final_df.Date, final_df.SentScore,'b',linewidth=1, markersize=2)
 ax1.set_ylabel('Sentiment')
-ax1.set_title("Intraday RV Ratio vs Dispersion")
-ax1.legend(loc=0)
+ax1.set_title("Intraday RV Ratio vs Sentiment")
+ax1.legend(loc=0,frameon=False)
 ax2 = ax1.twinx()  # this is the important function
-ax2.plot(final_df.Date, final_df.IRV_ratio, 'r')
-ax2.set_ylim([0, 3.5])
+ax2.plot(final_df.Date, final_df.IRV_ratio, 'r',linewidth=1, markersize=2)
+ax2.set_ylim([0, 3])
 ax2.set_ylabel('IRV Ratio')
 #ax2.set_xlabel('Date')
-ax2.legend(loc='lower right')
+ax2.legend(loc='lower right',frameon=False)
 plt.savefig('Intraday RV Ratio vs Sentiment.png',dpi = 720,transparent=True)
 plt.show()
 
@@ -419,16 +425,16 @@ plt.show()
 fig = plt.figure()
 
 ax1 = fig.add_subplot(111)
-ax1.plot(final_df.Date, final_df.SentScore)
+ax1.plot(final_df.Date, final_df.SentScore,'b',linewidth=1, markersize=2)
 ax1.set_ylabel('Sentiment')
 ax1.set_title("AAPL Intraday RV  vs Sentiment")
-ax1.legend(loc=0)
+ax1.legend(loc=0,frameon=False)
 ax2 = ax1.twinx()  # this is the important function
-ax2.plot(final_df.Date, final_df.AAPL_IntradayRV, 'r')
+ax2.plot(final_df.Date, final_df.AAPL_IntradayRV, 'r',linewidth=1, markersize=2)
 #ax2.set_ylim([0, 2])
 ax2.set_ylabel('IRV')
 #ax2.set_xlabel('Date')
-ax2.legend(loc='lower right')
+ax2.legend(loc='lower right',frameon=False)
 plt.savefig('AAPL Intraday RV vs Sentiment.png',dpi = 720,transparent=True)
 plt.show()
 
@@ -437,16 +443,16 @@ plt.show()
 fig = plt.figure()
 
 ax1 = fig.add_subplot(111)
-ax1.plot(final_df.Date, final_df.Dispersion)
+ax1.plot(final_df.Date, final_df.Dispersion,'b',linewidth=1, markersize=2)
 ax1.set_ylabel('Dispersion')
 ax1.set_title("AAPL Intraday RV vs Dispersion")
-ax1.legend(loc=0)
+ax1.legend(loc=0,frameon=False)
 ax2 = ax1.twinx()  # this is the important function
-ax2.plot(final_df.Date, final_df.AAPL_IntradayRV, 'r')
+ax2.plot(final_df.Date, final_df.AAPL_IntradayRV, 'r',linewidth=1, markersize=2)
 #ax2.set_ylim([0, 3])
 ax2.set_ylabel('IRV')
 #ax2.set_xlabel('Date')
-ax2.legend(loc='lower right')
+ax2.legend(loc='lower right',frameon=False)
 plt.savefig('AAPL Intraday RV vs Dispersion.png',dpi = 720,transparent=True)
 plt.show()
 
@@ -455,15 +461,23 @@ plt.show()
 fig = plt.figure()
 
 ax1 = fig.add_subplot(111)
-ax1.plot(final_df.Date, final_df.SentScore)
+ax1.plot(final_df.Date, final_df.SentScore,'b',linewidth=1, markersize=2)
 ax1.set_ylabel('Sentiment')
 ax1.set_title("NDX Intraday RV  vs Sentiment")
-ax1.legend(loc=0)
+ax1.legend(loc=0,frameon=False)
 ax2 = ax1.twinx()  # this is the important function
-ax2.plot(final_df.Date, final_df.NDX_IntradayRV, 'r')
+ax2.plot(final_df.Date, final_df.NDX_IntradayRV, 'r',linewidth=1, markersize=2)
 #ax2.set_ylim([0, 2])
 ax2.set_ylabel('IRV')
 #ax2.set_xlabel('Date')
-ax2.legend(loc='lower right')
+ax2.legend(loc='lower right',frameon=False)
 plt.savefig('NDX Intraday RV vs Sentiment.png',dpi = 720,transparent=True)
 plt.show()
+
+
+##############################################
+# part V: Check the results
+##############################################
+print(df_agg.ix[df_agg.SentScore>0.9],df_agg.ix[df_agg.SentScore<-0.9])
+
+
